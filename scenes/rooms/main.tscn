@@ -1,0 +1,15 @@
+[gd_scene load_steps=4 format=3 uid="uid://c1uisxyj8rv2d"]
+
+[ext_resource type="PackedScene" uid="uid://cepe1ofdurjfc" path="res://scenes/rooms/test_room.tscn" id="1_iosg3"]
+[ext_resource type="PackedScene" uid="uid://7ageagrmlf67" path="res://scenes/player/player.tscn" id="2_juy2t"]
+[ext_resource type="Script" path="res://scenes/rooms/camera_controller.gd" id="3_lvqao"]
+
+[node name="Main" type="Node2D"]
+
+[node name="TestRoom" parent="." instance=ExtResource("1_iosg3")]
+
+[node name="Player" parent="." instance=ExtResource("2_juy2t")]
+position = Vector2(65, 98)
+
+[node name="Camera2D2" type="Camera2D" parent="."]
+script = ExtResource("3_lvqao")

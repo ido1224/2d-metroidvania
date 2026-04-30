@@ -1,0 +1,16 @@
+# Godot 4 — generated / cache files
+.godot/
+/android/
+
+# Export builds
+export_presets.cfg
+*.translation
+
+# OS junk
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor configs
+.vscode/
+.idea/

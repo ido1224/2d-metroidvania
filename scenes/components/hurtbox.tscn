@@ -1,0 +1,12 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scenes/components/hurtbox.gd" id="1_hurtbox"]
+
+[sub_resource type="RectangleShape2D" id="hurtbox_shape"]
+size = Vector2(12, 20)
+
+[node name="Hurtbox" type="Area2D"]
+script = ExtResource("1_hurtbox")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("hurtbox_shape")

@@ -1,0 +1,113 @@
+[gd_scene load_steps=18 format=3]
+
+[ext_resource type="Script" path="res://scenes/enemies/ground_walker/ground_walker.gd" id="1_gw"]
+[ext_resource type="Script" path="res://scenes/enemies/states/enemy_state_machine.gd" id="2_sm"]
+[ext_resource type="Script" path="res://scenes/enemies/states/ground_walker/alert.gd" id="3_alert"]
+[ext_resource type="Script" path="res://scenes/enemies/states/ground_walker/idle.gd" id="4_idle"]
+[ext_resource type="Script" path="res://scenes/enemies/states/ground_walker/patrol.gd" id="5_patrol"]
+[ext_resource type="Script" path="res://scenes/enemies/states/ground_walker/chase.gd" id="6_chase"]
+[ext_resource type="Script" path="res://scenes/enemies/states/ground_walker/attack.gd" id="7_attack"]
+[ext_resource type="Script" path="res://scenes/enemies/states/ground_walker/hurt.gd" id="8_hurt"]
+[ext_resource type="Script" path="res://scenes/enemies/states/ground_walker/death.gd" id="9_death"]
+[ext_resource type="PackedScene" path="res://scenes/components/hurtbox.tscn" id="10_hurtbox"]
+[ext_resource type="PackedScene" path="res://scenes/components/hitbox.tscn" id="11_hitbox"]
+[ext_resource type="PackedScene" path="res://scenes/components/health_component.tscn" id="12_health"]
+[ext_resource type="Texture2D" path="res://assets/sprites/tilesets/placeholder_tile.png" id="13_sprite"]
+
+[sub_resource type="RectangleShape2D" id="body_shape"]
+size = Vector2(16, 16)
+
+[sub_resource type="CircleShape2D" id="detection_shape"]
+radius = 120.0
+
+; ---------------------------------------------------------------
+; Physics layer reference:
+;   World=1  Player=2  Enemy=4  PlayerHitbox=8
+;   EnemyHitbox=16  PlayerHurtbox=32  EnemyHurtbox=64
+; ---------------------------------------------------------------
+
+[node name="GroundWalker" type="CharacterBody2D"]
+collision_layer = 4
+collision_mask = 1
+script = ExtResource("1_gw")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("13_sprite")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("body_shape")
+
+[node name="StateMachine" type="Node" parent="."]
+script = ExtResource("2_sm")
+
+[node name="Alert" type="Node" parent="StateMachine"]
+script = ExtResource("3_alert")
+
+[node name="Idle" type="Node" parent="StateMachine"]
+script = ExtResource("4_idle")
+
+[node name="Patrol" type="Node" parent="StateMachine"]
+script = ExtResource("5_patrol")
+
+[node name="Chase" type="Node" parent="StateMachine"]
+script = ExtResource("6_chase")
+
+[node name="Attack" type="Node" parent="StateMachine"]
+script = ExtResource("7_attack")
+
+[node name="Hurt" type="Node" parent="StateMachine"]
+script = ExtResource("8_hurt")
+
+[node name="Death" type="Node" parent="StateMachine"]
+script = ExtResource("9_death")
+
+; Hurtbox — EnemyHurtbox layer (64), no mask (scanned by hitboxes, doesn't scan)
+[node name="Hurtbox" parent="." instance=ExtResource("10_hurtbox")]
+collision_layer = 64
+collision_mask = 0
+
+; Hitbox — EnemyHitbox layer (16), masks PlayerHurtbox (32). Starts deactivated.
+; monitoring = false is set here explicitly because Area2D defaults to true.
+; The hitbox.gd _ready() also sets it, but the tscn property is the only
+; guaranteed-before-physics-frame override for instanced PackedScenes.
+[node name="Hitbox" parent="." instance=ExtResource("11_hitbox")]
+collision_layer = 16
+collision_mask = 32
+monitoring = false
+damage = 1
+knockback_force = 200.0
+
+; HealthComponent — 3 HP
+[node name="HealthComponent" parent="." instance=ExtResource("12_health")]
+max_health = 3
+
+; DetectionZone — no layer, masks Player body (2). Radius 120px.
+[node name="DetectionZone" type="Area2D" parent="."]
+collision_layer = 0
+collision_mask = 2
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="DetectionZone"]
+shape = SubResource("detection_shape")
+
+; WallCheck — horizontal raycast, World layer mask, facing right by default
+[node name="WallCheck" type="RayCast2D" parent="."]
+target_position = Vector2(20, 0)
+collision_mask = 1
+
+; FloorCheck — forward+down raycast to detect ledges, World layer mask
+[node name="FloorCheck" type="RayCast2D" parent="."]
+target_position = Vector2(20, 10)
+collision_mask = 1
+
+; BodyArea — always-active contact damage zone sized to the enemy body.
+; EnemyHitbox layer (16), masks PlayerHurtbox (32).
+; monitorable = false — nothing should detect this area; it only detects others.
+; Handled in base_enemy._on_body_contact(). No hitstop — contact damage is
+; environmental, not a deliberate swing. I-frames rate-limit it naturally.
+[node name="BodyArea" type="Area2D" parent="."]
+collision_layer = 16
+collision_mask = 32
+monitorable = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="BodyArea"]
+shape = SubResource("body_shape")

@@ -1,0 +1,104 @@
+[gd_scene load_steps=18 format=3 uid="uid://7ageagrmlf67"]
+
+[ext_resource type="Script" path="res://scenes/player/player.gd" id="1_script"]
+[ext_resource type="Script" path="res://scenes/player/states/state_machine.gd" id="2_sm"]
+[ext_resource type="Texture2D" uid="uid://c5mxw01sq5ud" path="res://assets/sprites/player/lobster_bisk.png" id="2_x03hr"]
+[ext_resource type="Script" path="res://scenes/player/states/idle.gd" id="3_idle"]
+[ext_resource type="Script" path="res://scenes/player/states/run.gd" id="4_run"]
+[ext_resource type="Script" path="res://scenes/player/states/jump.gd" id="5_jump"]
+[ext_resource type="Script" path="res://scenes/player/states/fall.gd" id="6_fall"]
+[ext_resource type="Script" path="res://scenes/player/player_camera.gd" id="7_och1a"]
+[ext_resource type="Script" path="res://scenes/player/states/attack.gd" id="7_ooya5"]
+[ext_resource type="Script" path="res://scenes/componets/hitbox.gd" id="8_vlpnh"]
+[ext_resource type="Script" path="res://scenes/componets/hurtbox.gd" id="9_1i1ep"]
+[ext_resource type="Script" path="res://scenes/components/health_component.gd" id="10_5bpws"]
+[ext_resource type="Script" path="res://scenes/player/states/dash.gd" id="11_dash"]
+[ext_resource type="Script" path="res://scenes/player/states/ground_slam.gd" id="12_slam"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_it01u"]
+size = Vector2(16, 24)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_xmnno"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_wufei"]
+size = Vector2(12, 20)
+
+[node name="Player" type="CharacterBody2D"]
+collision_layer = 2
+script = ExtResource("1_script")
+run_speed = 170.0
+air_acceleration = 1400.0
+jump_force = 410.0
+has_dash = true
+dash_level = 1
+dash_cooldown_max = 0.45
+pogo_force = 450.0
+hit_recoil_force = 50.0
+knockback_duration = 0.1
+knockback_lift = 200.0
+hitstop_duration = 0.4
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_it01u")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("2_x03hr")
+
+[node name="CoyoteTimer" type="Timer" parent="."]
+wait_time = 0.08
+one_shot = true
+
+[node name="JumpBufferTimer" type="Timer" parent="."]
+wait_time = 0.1
+one_shot = true
+
+[node name="StateMachine" type="Node" parent="."]
+script = ExtResource("2_sm")
+
+[node name="Idle" type="Node" parent="StateMachine"]
+script = ExtResource("3_idle")
+
+[node name="Run" type="Node" parent="StateMachine"]
+script = ExtResource("4_run")
+
+[node name="Jump" type="Node" parent="StateMachine"]
+script = ExtResource("5_jump")
+
+[node name="Fall" type="Node" parent="StateMachine"]
+script = ExtResource("6_fall")
+
+[node name="Attack" type="Node" parent="StateMachine"]
+script = ExtResource("7_ooya5")
+
+[node name="Dash" type="Node" parent="StateMachine"]
+script = ExtResource("11_dash")
+
+[node name="GroundSlam" type="Node" parent="StateMachine"]
+script = ExtResource("12_slam")
+
+[node name="PlayerCamera" type="Camera2D" parent="."]
+script = ExtResource("7_och1a")
+
+[node name="Hitbox" type="Area2D" parent="."]
+position = Vector2(16, 0)
+collision_layer = 8
+collision_mask = 64
+script = ExtResource("8_vlpnh")
+knockback_force = 120.0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Hitbox"]
+shape = SubResource("RectangleShape2D_xmnno")
+
+[node name="Hurtbox" type="Area2D" parent="."]
+collision_layer = 32
+collision_mask = 0
+script = ExtResource("9_1i1ep")
+invincibility_frames = 60
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Hurtbox"]
+shape = SubResource("RectangleShape2D_wufei")
+
+[node name="HealthComponent" type="Node" parent="."]
+script = ExtResource("10_5bpws")
+
+[connection signal="timeout" from="CoyoteTimer" to="." method="_on_coyote_timer_timeout"]

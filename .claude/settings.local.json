@@ -1,0 +1,31 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir -p C:/nera-v2/voice C:/nera-v2/executor C:/nera-v2/memory C:/nera-v2/ui C:/nera-v2/tasks)",
+      "Bash(touch C:/nera-v2/voice/__init__.py C:/nera-v2/executor/__init__.py C:/nera-v2/memory/__init__.py C:/nera-v2/ui/__init__.py C:/nera-v2/tasks/.gitkeep)",
+      "Bash(python -c ' *)",
+      "Bash(python -)",
+      "Bash(timeout 15 python main.py)",
+      "Bash(echo \"EXIT:$?\")",
+      "Bash(pip install *)",
+      "Bash(timeout 20 python main.py)",
+      "Bash(python -c \"import pystray; print\\('pystray ok'\\)\")",
+      "Bash(python -c \"from PIL import Image; print\\('PIL ok'\\)\")",
+      "Bash(pip show *)",
+      "Bash(python -c \"import sys; print\\(sys.executable\\)\")",
+      "Bash(pip3 show *)",
+      "Bash(where python *)",
+      "Bash(where pip *)",
+      "Bash(python -m pip install pystray Pillow)",
+      "Bash(python -m pip install requests numpy sounddevice pynput psutil)",
+      "Bash(timeout 30 python main.py)",
+      "Bash(curl -s http://localhost:11434/api/tags)",
+      "Bash(python -c \"import ast; ast.parse\\(open\\('C:/nera-v2/voice/listener.py'\\).read\\(\\)\\); print\\('OK'\\)\")",
+      "Bash(python -m pip install rapidfuzz)",
+      "Bash(python3 -c \"from PIL import Image; img = Image.open\\('C:/Users/Ido124/OneDrive/מסמכים/2d-metroidvania-vibcode/assets/sprites/player/lobster_bisk.png'\\); print\\(img.size\\)\")",
+      "Bash(python3 -)",
+      "Bash(sort -t: -k2 -n)",
+      "PowerShell(gh --version 2>&1)"
+    ]
+  }
+}
