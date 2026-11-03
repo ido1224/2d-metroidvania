@@ -1,11 +1,34 @@
 # Dev Log — 2D Metroidvania
 
-## Current Version: 0.9.0
-## Last Updated: 2026-04-20
+## Current Version: 0.10.0
+## Last Updated: 2026-11-03
 
 ---
 
 ## Patch Notes
+
+### [0.10.0] — 2026-11-03 — Flyer enemy
+
+Second enemy type: an airborne diver. Purple placeholder square, 2 HP, placed in `test_room` at (860, 120) over the open floor.
+
+- **Files** — `scenes/enemies/flyer/flyer.gd` + `flyer.tscn`, states in `scenes/enemies/states/flyer/` (`hover`, `alert`, `chase`, `dive`, `return`, `hurt`). Death reuses `ground_walker/death.gd` (nothing walker-specific in it).
+- **No gravity** — `MOTION_MODE_FLOATING`; moves on both axes. Hurt knockback also works on both axes, so a pogo knocks it down.
+- **Behaviour** — Hover drifts around its home point → Alert (0.35 s "!") → Chase to a perch above and beside the player → Dive → Recovery → Chase again (≥0.7 s between dives). Leaves the player and flies home if they leave its 150 px detection radius or it gets more than 260 px (`leash_distance`) from home.
+- **Dive** — Windup 0.40 s (pulls back, red tint; aim locks at the END of the windup, so moving during the telegraph is the dodge). Dive at 270 px/s for up to 0.45 s (yellow, stretched along the dive, hitbox on its body). Recovery 0.60 s is the punish window; hitting a wall/floor "bonks" it (grey, 1.0 s recovery).
+- **Platform avoidance** — every check uses its own 16×16 collision box against the World layer:
+  - steering (`steer_toward`) looks 28 px ahead with `test_move` and turns up to ~120° to the clear side, preferring the side it last turned to so it doesn't flip-flop;
+  - a perch only counts if the box fits there and has a clear straight line to the player (tries same side, other side, straight above, then the same at half height);
+  - it only dives with a clear line to the player right now. With no way in (player under a platform) it hovers overhead and waits.
+- **Tested headless** (throwaway script, not in the repo): open air 4 dives in 10 s; platform between flyer and player → went round the edge and dived in from the side; player fully covered → 0 dives; never overlapped geometry in any case.
+
+#### Values that may need playtesting
+| Value | File | Now |
+|---|---|---|
+| Dive windup | `states/flyer/dive.gd` | 0.40 s |
+| Dive speed | `states/flyer/dive.gd` | 270 px/s |
+| Perch offset | `states/flyer/chase.gd` | 56 px side, 52 px up |
+| Gap between dives | `states/flyer/chase.gd` `MIN_CHASE_TIME` | 0.7 s |
+| Detection radius | `flyer.tscn` DetectionZone | 150 px |
 
 ### [0.9.0] — 2026-04-20 — HK-style enemy combat overhaul
 
@@ -512,5 +535,5 @@ The hitbox is no longer active for the full attack duration. It activates at `_H
 - [ ] Implement pause menu (Escape is already mapped)
 - [ ] Implement map screen (M key is already mapped)
 - [ ] Add more attack types / combos
-- [ ] Add enemy variety (ranged, flying, etc.)
+- [ ] Add enemy variety (ranged, flying, etc.) — Flyer done in v0.10.0; next: ranged shooter, leaper, shield bearer
 - [ ] Add collectibles / power-ups (use Interactable layer 8)

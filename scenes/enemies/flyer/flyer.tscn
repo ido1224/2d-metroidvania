@@ -1,0 +1,107 @@
+[gd_scene load_steps=16 format=3]
+
+[ext_resource type="Script" path="res://scenes/enemies/flyer/flyer.gd" id="1_fly"]
+[ext_resource type="Script" path="res://scenes/enemies/states/enemy_state_machine.gd" id="2_sm"]
+[ext_resource type="Script" path="res://scenes/enemies/states/flyer/hover.gd" id="3_hover"]
+[ext_resource type="Script" path="res://scenes/enemies/states/flyer/alert.gd" id="4_alert"]
+[ext_resource type="Script" path="res://scenes/enemies/states/flyer/chase.gd" id="5_chase"]
+[ext_resource type="Script" path="res://scenes/enemies/states/flyer/dive.gd" id="6_dive"]
+[ext_resource type="Script" path="res://scenes/enemies/states/flyer/return.gd" id="7_return"]
+[ext_resource type="Script" path="res://scenes/enemies/states/flyer/hurt.gd" id="8_hurt"]
+[ext_resource type="Script" path="res://scenes/enemies/states/ground_walker/death.gd" id="9_death"]
+[ext_resource type="PackedScene" path="res://scenes/components/hurtbox.tscn" id="10_hurtbox"]
+[ext_resource type="PackedScene" path="res://scenes/components/hitbox.tscn" id="11_hitbox"]
+[ext_resource type="PackedScene" path="res://scenes/components/health_component.tscn" id="12_health"]
+[ext_resource type="Texture2D" path="res://assets/sprites/tilesets/placeholder_tile.png" id="13_sprite"]
+
+[sub_resource type="RectangleShape2D" id="body_shape"]
+size = Vector2(16, 16)
+
+[sub_resource type="CircleShape2D" id="detection_shape"]
+radius = 150.0
+
+; ---------------------------------------------------------------
+; Physics layer reference:
+;   World=1  Player=2  Enemy=4  PlayerHitbox=8
+;   EnemyHitbox=16  PlayerHurtbox=32  EnemyHurtbox=64
+;
+; Same node layout as GroundWalker (BaseEnemy requires it) minus
+; WallCheck/FloorCheck: the flyer avoids platforms with test_move
+; against its own body shape instead (flyer.gd).
+; motion_mode = 1 is MOTION_MODE_FLOATING: no floor/ceiling logic.
+; The Death state is the Ground Walker's — it has nothing
+; walker-specific in it.
+; ---------------------------------------------------------------
+
+[node name="Flyer" type="CharacterBody2D"]
+collision_layer = 4
+collision_mask = 1
+motion_mode = 1
+script = ExtResource("1_fly")
+run_speed = 70.0
+
+; Purple tint so it's told apart from the walker at a glance.
+; self_modulate, so hit flash / telegraph tints (modulate) still show.
+[node name="Sprite2D" type="Sprite2D" parent="."]
+self_modulate = Color(0.75, 0.5, 1, 1)
+texture = ExtResource("13_sprite")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("body_shape")
+
+[node name="StateMachine" type="Node" parent="."]
+script = ExtResource("2_sm")
+initial_state_name = "Hover"
+
+[node name="Hover" type="Node" parent="StateMachine"]
+script = ExtResource("3_hover")
+
+[node name="Alert" type="Node" parent="StateMachine"]
+script = ExtResource("4_alert")
+
+[node name="Chase" type="Node" parent="StateMachine"]
+script = ExtResource("5_chase")
+
+[node name="Dive" type="Node" parent="StateMachine"]
+script = ExtResource("6_dive")
+
+[node name="Return" type="Node" parent="StateMachine"]
+script = ExtResource("7_return")
+
+[node name="Hurt" type="Node" parent="StateMachine"]
+script = ExtResource("8_hurt")
+
+[node name="Death" type="Node" parent="StateMachine"]
+script = ExtResource("9_death")
+
+[node name="Hurtbox" parent="." instance=ExtResource("10_hurtbox")]
+collision_layer = 64
+collision_mask = 0
+
+; The flyer's whole body is the weapon during a dive, so the hitbox
+; sits on its centre rather than in front of it.
+[node name="Hitbox" parent="." instance=ExtResource("11_hitbox")]
+collision_layer = 16
+collision_mask = 32
+monitoring = false
+damage = 1
+knockback_force = 180.0
+
+; 2 HP — weaker than the walker (3), it's harder to hit
+[node name="HealthComponent" parent="." instance=ExtResource("12_health")]
+max_health = 2
+
+[node name="DetectionZone" type="Area2D" parent="."]
+collision_layer = 0
+collision_mask = 2
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="DetectionZone"]
+shape = SubResource("detection_shape")
+
+[node name="BodyArea" type="Area2D" parent="."]
+collision_layer = 16
+collision_mask = 32
+monitorable = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="BodyArea"]
+shape = SubResource("body_shape")

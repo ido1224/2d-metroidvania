@@ -1,10 +1,11 @@
-[gd_scene load_steps=6 format=4 uid="uid://cepe1ofdurjfc"]
+[gd_scene load_steps=7 format=4 uid="uid://cepe1ofdurjfc"]
 
 [ext_resource type="PackedScene" uid="uid://7ageagrmlf67" path="res://scenes/player/player.tscn" id="1_7lhyk"]
 [ext_resource type="Script" path="res://scenes/rooms/base_room.gd" id="1_pvj7t"]
 [ext_resource type="TileSet" uid="uid://c1rgqtf5ehmi6" path="res://resources/tileset.tres" id="2_gftmu"]
 [ext_resource type="PackedScene" uid="uid://cqq5mtnhg54q4" path="res://scenes/objects/door.tscn" id="4_ivh7c"]
 [ext_resource type="PackedScene" path="res://scenes/enemies/ground_walker/ground_walker.tscn" id="5_gw"]
+[ext_resource type="PackedScene" path="res://scenes/enemies/flyer/flyer.tscn" id="6_fly"]
 
 [node name="TestRoom" type="Node2D"]
 script = ExtResource("1_pvj7t")
@@ -39,6 +40,9 @@ color = Color(0.118, 0.133, 0.149, 1)
 
 [node name="GroundWalker" parent="." instance=ExtResource("5_gw")]
 position = Vector2(726, 234)
+
+[node name="Flyer" parent="." instance=ExtResource("6_fly")]
+position = Vector2(860, 120)
 
 [node name="DoorRight" parent="." instance=ExtResource("4_ivh7c")]
 position = Vector2(977, 232)

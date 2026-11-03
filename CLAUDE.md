@@ -260,7 +260,7 @@ Every room scene's root node uses `base_room.gd`. On `_ready()`, it deferred-cal
 - Input: keyboard + gamepad bindings for move, jump, attack, dash, interact, pause, map
 
 ### Incomplete / Placeholder
-- Only one enemy type (Ground Walker); no ranged/flying enemies yet
+- Two enemy types (Ground Walker, Flyer — DEVLOG 0.10.0); ranged shooter, leaper and shield bearer planned
 - UI is only the health HUD — no pause menu, no map screen
 - No audio — audio folder is empty; no AudioStreamPlayers anywhere
 - Dash is implemented but gated behind `has_dash = true` (Inspector toggle) — set `dash_level = 1` for basic, `dash_level = 2` for pierce
