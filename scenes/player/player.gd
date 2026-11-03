@@ -78,7 +78,8 @@ var attack_direction: Vector2 = Vector2.RIGHT
 # --- Knockback ---
 
 ## How long input is suppressed after being hit (seconds).
-## During this window handle_horizontal_movement applies friction only.
+## During this window handle_horizontal_movement does nothing, so the hit's
+## velocity carries (no friction, no walking); jump/dash/attack still work.
 ## HK recovers control in ~9 frames = 0.15 s.
 @export var knockback_duration: float = 0.15
 
@@ -349,10 +350,15 @@ func apply_gravity(delta: float) -> void:
 
 
 func handle_horizontal_movement(delta: float) -> void:
-	var fric: float = ground_friction if is_on_floor() else air_friction
+	# During the short knockback window, let the hit's velocity carry.
+	# Without this, ground friction (3000 px/s²) erased a 200 px/s knockback
+	# within ~4 frames — hits only moved the player ~11 px (measured).
+	# Jump, dash and attack are separate states, so they still work here;
+	# only walking/friction waits the 0.15 s out.
+	if _knockback_timer > 0.0:
+		return
 
-	# Knockback timer is kept for i-frame tracking but no longer locks input —
-	# the player can immediately redirect or dash after being hit.
+	var fric: float = ground_friction if is_on_floor() else air_friction
 
 	var input_dir: float = Input.get_axis("move_left", "move_right")
 	var accel: float = ground_acceleration if is_on_floor() else air_acceleration

@@ -1,11 +1,19 @@
 # Dev Log — 2D Metroidvania
 
-## Current Version: 0.10.0
+## Current Version: 0.10.1
 ## Last Updated: 2026-11-03
 
 ---
 
 ## Patch Notes
+
+### [0.10.1] — 2026-11-03 — Player knockback actually carries
+
+- **Bug: hits barely moved the player.** `handle_horizontal_movement` applied ground friction (3000 px/s²) on the very next frame, erasing a 200 px/s knockback in ~4 frames. Measured: a Ground Walker hit pushed the player **11 px**. Now, for the existing `knockback_duration` (0.15 s), horizontal movement/friction is skipped so the hit's velocity carries. Jump, dash and attack are separate states and still work during it. Walker hit now pushes **46 px** (+17 px hop).
+- **Flyer knockback was pointing into the floor.** Both its dive hitbox and its body contact pushed along the line from above, so the player moved ~6 px. Now both push straight sideways (away from the flyer / the way the dive travels); `player.gd` adds its usual ground hop. Flyer hit now pushes **39–46 px** (+17 px hop).
+- `BaseEnemy.contact_knockback_direction(diff)` — new overridable hook for body-contact knockback direction (default: straight away from the enemy's centre, unchanged for the walker). Flyer overrides it.
+- Flyer dive hitbox `knockback_force` 180 → 200 (same as the walker).
+- Flyer home position is read on its first physics frame (a Flyer spawned from code used to fly to (0, 0)); brighter purple tint.
 
 ### [0.10.0] — 2026-11-03 — Flyer enemy
 

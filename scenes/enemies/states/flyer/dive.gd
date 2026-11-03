@@ -124,7 +124,12 @@ func _begin_dive() -> void:
 	spr.rotation = _dive_dir.angle() - (PI if enemy.facing_direction == -1 else 0.0)
 	_play_scale_tween(Vector2(1.5, 0.7), 0.06, Tween.TRANS_QUAD)
 
-	enemy.get_node("Hitbox").activate(_dive_dir)
+	# Knock the player straight sideways (the way the dive is travelling), not along the
+	# dive itself: a dive from above pointed the knockback into the floor, so
+	# the player barely moved. Straight-down dives use the facing direction.
+	# player.gd adds its own upward lift for hits taken on the ground.
+	var side: float = signf(_dive_dir.x) if absf(_dive_dir.x) > 0.15 else float(enemy.facing_direction)
+	enemy.get_node("Hitbox").activate(Vector2(side, 0.0))
 
 
 func _begin_recovery(bonked: bool) -> void:

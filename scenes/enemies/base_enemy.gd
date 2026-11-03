@@ -236,4 +236,11 @@ func _on_body_contact(area: Area2D) -> void:
 	if diff.is_zero_approx():
 		diff = Vector2(float(facing_direction), 0.0)
 
-	area.take_hit(1, diff.normalized() * 160.0)
+	area.take_hit(1, contact_knockback_direction(diff) * 160.0)
+
+
+## Direction the player is pushed on body contact, given the offset from the
+## enemy's centre to the player's hurtbox. Override for enemies that touch the
+## player from above (Flyer), where "straight away" points into the floor.
+func contact_knockback_direction(diff: Vector2) -> Vector2:
+	return diff.normalized()

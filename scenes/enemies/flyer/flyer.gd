@@ -145,6 +145,14 @@ func face_velocity() -> void:
 		set_facing(1 if velocity.x > 0.0 else -1)
 
 
+## Contact from above would push the player into the floor; push them
+## straight sideways, away from the flyer, instead. Kept flat on purpose:
+## player.gd only adds its upward hop when the knockback has no upward part.
+func contact_knockback_direction(diff: Vector2) -> Vector2:
+	var side: float = signf(diff.x) if absf(diff.x) > 2.0 else float(facing_direction)
+	return Vector2(side, 0.0)
+
+
 ## True when it has strayed further than leash_distance from home
 func is_leashed() -> bool:
 	return global_position.distance_to(home_position) > leash_distance

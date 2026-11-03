@@ -86,7 +86,7 @@ collision_layer = 16
 collision_mask = 32
 monitoring = false
 damage = 1
-knockback_force = 180.0
+knockback_force = 200.0
 
 ; 2 HP — weaker than the walker (3), it's harder to hit
 [node name="HealthComponent" parent="." instance=ExtResource("12_health")]
