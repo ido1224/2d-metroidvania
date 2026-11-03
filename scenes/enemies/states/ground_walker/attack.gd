@@ -128,8 +128,8 @@ func _begin_lunge() -> void:
 	_timer = 0.0
 	_phase = Phase.LUNGE
 
-	# Clear telegraph tint
-	enemy.get_node("Sprite2D").modulate = Color.WHITE
+	# Yellow tint on lunge
+	enemy.get_node("Sprite2D").modulate = Color(1.0, 0.9, 0.0)
 
 	# Position and activate hitbox
 	var hb = enemy.get_node("Hitbox")

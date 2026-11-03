@@ -139,7 +139,7 @@ func apply_knockback(source_global_position: Vector2, force: float) -> void:
 
 ## Brief over-bright flash to signal that the enemy took a hit.
 func flash() -> void:
-	$Sprite2D.modulate = Color(10.0, 10.0, 10.0)
+	$Sprite2D.modulate = Color(1.0, 0.2, 0.2)
 	var tween := create_tween()
 	tween.tween_property($Sprite2D, "modulate", Color(1.0, 1.0, 1.0, 1.0), 0.15)
 
