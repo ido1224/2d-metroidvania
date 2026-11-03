@@ -1,0 +1,110 @@
+[gd_scene load_steps=17 format=3]
+
+[ext_resource type="Script" path="res://scenes/enemies/leaper/leaper.gd" id="1_leap"]
+[ext_resource type="Script" path="res://scenes/enemies/states/enemy_state_machine.gd" id="2_sm"]
+[ext_resource type="Script" path="res://scenes/enemies/states/ground_walker/idle.gd" id="3_idle"]
+[ext_resource type="Script" path="res://scenes/enemies/states/ground_walker/patrol.gd" id="4_patrol"]
+[ext_resource type="Script" path="res://scenes/enemies/states/leaper/alert.gd" id="5_alert"]
+[ext_resource type="Script" path="res://scenes/enemies/states/leaper/stalk.gd" id="6_stalk"]
+[ext_resource type="Script" path="res://scenes/enemies/states/leaper/leap.gd" id="7_leap"]
+[ext_resource type="Script" path="res://scenes/enemies/states/leaper/hurt.gd" id="8_hurt"]
+[ext_resource type="Script" path="res://scenes/enemies/states/ground_walker/death.gd" id="9_death"]
+[ext_resource type="PackedScene" path="res://scenes/components/hurtbox.tscn" id="10_hurtbox"]
+[ext_resource type="PackedScene" path="res://scenes/components/hitbox.tscn" id="11_hitbox"]
+[ext_resource type="PackedScene" path="res://scenes/components/health_component.tscn" id="12_health"]
+[ext_resource type="Texture2D" path="res://assets/sprites/tilesets/placeholder_tile.png" id="13_sprite"]
+
+[sub_resource type="RectangleShape2D" id="body_shape"]
+size = Vector2(16, 16)
+
+[sub_resource type="CircleShape2D" id="detection_shape"]
+radius = 160.0
+
+; ---------------------------------------------------------------
+; Physics layer reference:
+;   World=1  Player=2  Enemy=4  PlayerHitbox=8
+;   EnemyHitbox=16  PlayerHurtbox=32  EnemyHurtbox=64
+;
+; Same layout as the Ground Walker (it reuses the walker's Idle,
+; Patrol and Death states, which need WallCheck/FloorCheck).
+; The Hitbox stays centred: during a leap its whole body is the
+; weapon.
+; ---------------------------------------------------------------
+
+[node name="Leaper" type="CharacterBody2D"]
+collision_layer = 4
+collision_mask = 1
+script = ExtResource("1_leap")
+run_speed = 45.0
+
+; Bright orange tint (walker = grey, flyer = purple, shooter = green).
+; self_modulate, so hit flash / crouch / land tints (modulate) still show.
+[node name="Sprite2D" type="Sprite2D" parent="."]
+self_modulate = Color(2.6, 1.6, 0.6, 1)
+texture = ExtResource("13_sprite")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("body_shape")
+
+[node name="StateMachine" type="Node" parent="."]
+script = ExtResource("2_sm")
+initial_state_name = "Idle"
+
+[node name="Idle" type="Node" parent="StateMachine"]
+script = ExtResource("3_idle")
+
+[node name="Patrol" type="Node" parent="StateMachine"]
+script = ExtResource("4_patrol")
+
+[node name="Alert" type="Node" parent="StateMachine"]
+script = ExtResource("5_alert")
+
+[node name="Stalk" type="Node" parent="StateMachine"]
+script = ExtResource("6_stalk")
+
+[node name="Leap" type="Node" parent="StateMachine"]
+script = ExtResource("7_leap")
+
+[node name="Hurt" type="Node" parent="StateMachine"]
+script = ExtResource("8_hurt")
+
+[node name="Death" type="Node" parent="StateMachine"]
+script = ExtResource("9_death")
+
+[node name="Hurtbox" parent="." instance=ExtResource("10_hurtbox")]
+collision_layer = 64
+collision_mask = 0
+
+[node name="Hitbox" parent="." instance=ExtResource("11_hitbox")]
+collision_layer = 16
+collision_mask = 32
+monitoring = false
+damage = 1
+knockback_force = 200.0
+
+; 3 HP — same as the walker
+[node name="HealthComponent" parent="." instance=ExtResource("12_health")]
+max_health = 3
+
+[node name="DetectionZone" type="Area2D" parent="."]
+collision_layer = 0
+collision_mask = 2
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="DetectionZone"]
+shape = SubResource("detection_shape")
+
+[node name="WallCheck" type="RayCast2D" parent="."]
+target_position = Vector2(20, 0)
+collision_mask = 1
+
+[node name="FloorCheck" type="RayCast2D" parent="."]
+target_position = Vector2(20, 10)
+collision_mask = 1
+
+[node name="BodyArea" type="Area2D" parent="."]
+collision_layer = 16
+collision_mask = 32
+monitorable = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="BodyArea"]
+shape = SubResource("body_shape")

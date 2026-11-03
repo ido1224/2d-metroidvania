@@ -130,6 +130,22 @@ func set_facing(direction: int) -> void:
 		$FloorCheck.target_position.x = absf($FloorCheck.target_position.x) * direction
 
 
+## True if it can take a step in [dir] (-1 / +1): no wall right ahead and
+## floor under the next step. Casts its own rays in the direction of travel,
+## so it works while walking backwards (WallCheck/FloorCheck only point the
+## way it faces). Used by the Shooter (keeping distance) and the Leaper
+## (backing off to get room to jump).
+func can_step(dir: float) -> bool:
+	var space := get_world_2d().direct_space_state
+	var ahead := Vector2(dir * 12.0, 0.0)
+	var wall := PhysicsRayQueryParameters2D.create(global_position, global_position + ahead, 1, [get_rid()])
+	if not space.intersect_ray(wall).is_empty():
+		return false
+	var floor_ray := PhysicsRayQueryParameters2D.create(
+			global_position + ahead, global_position + ahead + Vector2(0, 18), 1, [get_rid()])
+	return not space.intersect_ray(floor_ray).is_empty()
+
+
 ## Compute knockback direction from a world-space source position and apply it.
 ## Useful for projectile impacts or area-of-effect damage sources.
 func apply_knockback(source_global_position: Vector2, force: float) -> void:

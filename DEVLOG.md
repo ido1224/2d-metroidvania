@@ -1,11 +1,32 @@
 # Dev Log — 2D Metroidvania
 
-## Current Version: 0.11.0
+## Current Version: 0.12.0
 ## Last Updated: 2026-11-03
 
 ---
 
 ## Patch Notes
+
+### [0.12.0] — 2026-11-03 — Leaper enemy
+
+Fourth enemy type: a ground enemy that attacks by jumping at the player. Orange placeholder square, 3 HP, placed in `test_room` at (60, 240) (left of the block).
+
+- **Files** — `scenes/enemies/leaper/leaper.gd` + `leaper.tscn`, states in `scenes/enemies/states/leaper/` (`alert`, `stalk`, `leap`, `hurt`). Reuses the Ground Walker's `idle`, `patrol` and `death`.
+- **Stalk** — creeps toward the player at 0.6× run_speed, stops at walls/ledges, stops closing in at 70 px (prefers to jump from mid range). Leaps when the player is 24–150 px away horizontally, the 1.2 s post-landing cooldown is over and the arc is safe. Within 40 px it backs off to make room; if it can't back off (wall behind it) it pounces from where it stands.
+- **Leap** — CROUCH 0.40 s (red, squashed; aim taken at the end, so moving is the dodge) → AIR (yellow, stretched, body hitbox on, knockback flat sideways) → LAND 0.75 s (grey, flattened, dazed: the punish window).
+- **Real ballistics** — `compute_leap()` solves the launch velocity from the project gravity to land on the player's floor where they stood; `plan_leap()` tries peak heights 48 → 72 → 96 px and takes the first arc that `trajectory_clear()` approves. That traces the arc in 12 steps with the Leaper's own collision box (no platforms/ceilings/walls on the way) and checks there's floor where it lands. Players more than ~96 px above are out of reach.
+- **Shared** — `BaseEnemy.can_step(dir)` (wall + floor rays in the direction of travel, works walking backwards) moved here from the Shooter; both enemies use it.
+- **Tested headless** (throwaway script, not in the repo): open floor 3 leaps / 3 hits in 7 s, landings within 3 px of the player; leaps over the block next to it (needed the 72 px arc); ceiling slab in the way → 0 leaps; player on top of the tall structure → 0 leaps; leaps down off the table onto the floor; backed against the block with the player 16 px away → pounces. Never overlapped geometry. Flyer and Shooter tests still pass.
+
+#### Values that may need playtesting
+| Value | File | Now |
+|---|---|---|
+| Crouch (telegraph) | `states/leaper/leap.gd` | 0.40 s |
+| Dazed after landing | `states/leaper/leap.gd` | 0.75 s |
+| Leap range | `states/leaper/stalk.gd` | 24–150 px |
+| Normal / max jump height | `leaper.gd` | 48 / 96 px |
+| Cooldown after landing | `leaper.gd` `leap_cooldown` | 1.2 s |
+| Detection radius | `leaper.tscn` DetectionZone | 160 px |
 
 ### [0.11.0] — 2026-11-03 — Shooter enemy + reusable Projectile
 
@@ -565,5 +586,5 @@ The hitbox is no longer active for the full attack duration. It activates at `_H
 - [ ] Implement pause menu (Escape is already mapped)
 - [ ] Implement map screen (M key is already mapped)
 - [ ] Add more attack types / combos
-- [ ] Add enemy variety (ranged, flying, etc.) — Flyer done in v0.10.0, Shooter in v0.11.0; next: leaper, shield bearer
+- [ ] Add enemy variety (ranged, flying, etc.) — Flyer done in v0.10.0, Shooter in v0.11.0, Leaper in v0.12.0; next: shield bearer
 - [ ] Add collectibles / power-ups (use Interactable layer 8)

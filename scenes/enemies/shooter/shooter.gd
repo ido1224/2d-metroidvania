@@ -74,20 +74,6 @@ func has_line_of_sight() -> bool:
 	return get_world_2d().direct_space_state.intersect_ray(query).is_empty()
 
 
-## True if it can step in [dir] (-1 / +1): no wall right ahead and
-## floor under the next step. Works whichever way it's facing, which
-## matters because it walks backwards while keeping its distance.
-func can_move(dir: float) -> bool:
-	var space := get_world_2d().direct_space_state
-	var ahead := Vector2(dir * 12.0, 0.0)
-	var wall := PhysicsRayQueryParameters2D.create(global_position, global_position + ahead, 1, [get_rid()])
-	if not space.intersect_ray(wall).is_empty():
-		return false
-	var floor := PhysicsRayQueryParameters2D.create(
-			global_position + ahead, global_position + ahead + Vector2(0, 18), 1, [get_rid()])
-	return not space.intersect_ray(floor).is_empty()
-
-
 func face_player() -> void:
 	if not is_instance_valid(player):
 		return

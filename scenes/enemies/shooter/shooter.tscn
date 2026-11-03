@@ -25,8 +25,8 @@ radius = 200.0
 ;   EnemyHitbox=16  PlayerHurtbox=32  EnemyHurtbox=64
 ;
 ; Same node layout BaseEnemy requires. No WallCheck/FloorCheck:
-; it walks backwards while facing the player, so shooter.gd's
-; can_move() casts its own rays in the direction of travel.
+; it walks backwards while facing the player, so it uses
+; BaseEnemy.can_step(), which casts rays in the direction of travel.
 ; The Hitbox is never activated (it fights with projectiles); it
 ; is here because the shared Death state deactivates it.
 ; Death is the Ground Walker's (nothing walker-specific in it).

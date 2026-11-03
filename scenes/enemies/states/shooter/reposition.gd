@@ -6,7 +6,7 @@
 #   closer than MIN_DIST (horizontally)  -> back away (a bit faster)
 #   further than MAX_DIST, or no line of sight -> walk closer
 #   otherwise                            -> hold position
-# It never steps off a ledge or into a wall (Shooter.can_move);
+# It never steps off a ledge or into a wall (BaseEnemy.can_step);
 # if it's cornered it just stands its ground and keeps shooting.
 #
 # Transitions:
@@ -44,7 +44,7 @@ func physics_update(delta: float) -> String:
 		speed *= BACKOFF_SPEED_MULT
 	elif absf(dx) > MAX_DIST or not los:
 		move_dir = toward
-	if move_dir != 0.0 and not enemy.can_move(move_dir):
+	if move_dir != 0.0 and not enemy.can_step(move_dir):
 		move_dir = 0.0
 
 	enemy.velocity.x = move_toward(enemy.velocity.x, move_dir * speed, 900.0 * delta)
