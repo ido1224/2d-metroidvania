@@ -29,22 +29,32 @@ extends BaseEnemy
 ## Furthest it will chase from its home point before giving up (pixels)
 @export var leash_distance: float = 260.0
 
-## Where it was placed in the room; Hover and Return orbit this point
-var home_position: Vector2
+## Where it was placed in the room; Hover and Return orbit this point.
+## Captured on the first physics frame, not in _ready(): a Flyer spawned
+## from code is added to the tree BEFORE its position is set, so reading
+## it in _ready() gave (0, 0) and it flew off to the room's corner.
+## Setting it yourself before that frame also works.
+var home_position: Vector2:
+	set(value):
+		home_position = value
+		_home_set = true
 
 ## Running clock for the hover bob / drift (seconds)
 var hover_time: float = 0.0
 
+var _home_set: bool = false
+
 
 func _ready() -> void:
 	super()
-	home_position = global_position
 	# Also set in the .tscn; repeated here so a hand-built Flyer can't
 	# accidentally end up in grounded mode (it would slide along floors).
 	motion_mode = CharacterBody2D.MOTION_MODE_FLOATING
 
 
 func _physics_process(delta: float) -> void:
+	if not _home_set:
+		home_position = global_position
 	super(delta)
 	if hitstop_time > 0.0:
 		return
