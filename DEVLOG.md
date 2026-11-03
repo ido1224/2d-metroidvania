@@ -500,8 +500,8 @@ The hitbox is no longer active for the full attack duration. It activates at `_H
 - [ ] Fix `test_room_2` `RoomBoundsMin` Y value (change from -1856 to correct top boundary)
 - [ ] Set `room_id` on `test_room_3`
 - [ ] Delete unused `camera_controller.gd` and `main.tscn`'s stale Camera2D2 node
-- [ ] Build first enemy: CharacterBody2D with patrol AI, EnemyHitbox + EnemyHurtbox + HealthComponent
-- [ ] Add HUD CanvasLayer with health bar, connected to Player's `health_changed` signal
+- [x] Build first enemy: CharacterBody2D with patrol AI, EnemyHitbox + EnemyHurtbox + HealthComponent — Ground Walker, v0.3.0 (reworked through v0.9.0)
+- [x] Add HUD CanvasLayer with health bar, connected to Player's `health_changed` signal — done in v0.5.0
 - [x] Implement Dash state — done in v0.2.0
 - [ ] Add jump / land / attack SFX (AudioStreamPlayer nodes, wired to state enter/exit)
 - [ ] Add hit / death SFX

@@ -9,7 +9,7 @@
 | Field | Value |
 |---|---|
 | **Name** | 2D Metroidvania (working title) |
-| **Engine** | Godot 4.3 (GL Compatibility renderer) |
+| **Engine** | Godot 4.6.2 (GL Compatibility renderer) |
 | **Language** | GDScript |
 | **Target Platform** | PC (keyboard + gamepad) |
 | **Viewport** | 480×270 internal, stretched to 1920×1080 (pixel-perfect) |
@@ -49,7 +49,7 @@ This is a 2D side-scrolling Metroidvania built in Godot 4. The foundation is com
 │   ├── componets/          (MISSPELLED DUPLICATE — DO NOT USE, will be deleted)
 │   │   ├── hitbox.gd       (older, no class_name — used by player.tscn currently)
 │   │   └── hurtbox.gd
-│   ├── enemies/            (empty — next major system to build)
+│   ├── enemies/            (base_enemy.gd, enemy state machine, ground_walker/ + its 7 states — see DEVLOG 0.3.0–0.9.0)
 │   ├── objects/
 │   │   ├── door.gd
 │   │   └── door.tscn       (room-transition trigger with spawn point)
@@ -72,7 +72,7 @@ This is a 2D side-scrolling Metroidvania built in Godot 4. The foundation is com
 │   │   ├── test_room.tscn      (room 1 — starting room, ~976px wide)
 │   │   ├── test_room_2.tscn    (room 2 — standard 480px)
 │   │   └── test_room_3.tscn    (room 3 — ~1119px wide)
-│   └── ui/                 (empty — reserved for HUD, menus)
+│   └── ui/                 (player_hud.gd/.tscn — heart-pip health HUD; menus still to do)
 ├── shaders/                (empty — reserved)
 ├── data/                   (empty — reserved for JSON/data files)
 ├── project.godot
@@ -250,7 +250,9 @@ Every room scene's root node uses `base_room.gd`. On `_ready()`, it deferred-cal
 ### Working
 - Player movement: walk, run, jump (with cut + coyote + buffer), fall
 - State machine with 6 states (Idle, Run, Jump, Fall, Attack, Dash)
-- Basic melee attack with hitbox activation (no enemy targets yet)
+- Melee attack with directional hits and pogo (DEVLOG 0.8.x)
+- Ground Walker enemy: patrol, alert, chase, telegraphed lunge attack, hurt, death (HK Wandering Husk style, DEVLOG 0.9.0)
+- Player HUD: heart pips wired to HealthComponent.health_changed (DEVLOG 0.5.0)
 - Health system: HealthComponent, Hurtbox, i-frames, damage flash, death + reload
 - Camera: look-ahead, room boundary clamping, screen shake
 - Room system: 3 test rooms connected bidirectionally via doors
@@ -258,8 +260,8 @@ Every room scene's root node uses `base_room.gd`. On `_ready()`, it deferred-cal
 - Input: keyboard + gamepad bindings for move, jump, attack, dash, interact, pause, map
 
 ### Incomplete / Placeholder
-- No enemies — `scenes/enemies/` is empty; the hitbox/hurtbox/health pipeline is ready but untested against an actual enemy
-- No UI — no HUD (health bar, etc.), no pause menu, no map screen
+- Only one enemy type (Ground Walker); no ranged/flying enemies yet
+- UI is only the health HUD — no pause menu, no map screen
 - No audio — audio folder is empty; no AudioStreamPlayers anywhere
 - Dash is implemented but gated behind `has_dash = true` (Inspector toggle) — set `dash_level = 1` for basic, `dash_level = 2` for pierce
 - No save/load system — `room_id` fields exist but nothing writes or reads save data
@@ -269,8 +271,8 @@ Every room scene's root node uses `base_room.gd`. On `_ready()`, it deferred-cal
 
 ### What's Next (Priority Order)
 1. Fix the `componets/` → `components/` script path issue in `player.tscn`
-2. Build a basic enemy (Node2D + CharacterBody2D + EnemyHitbox + EnemyHurtbox + HealthComponent + simple patrol AI)
-3. Add HUD (health bar connected to Player's HealthComponent signals)
+2. ~~Build a basic enemy~~ **done (Ground Walker, v0.3.0 → v0.9.0)**
+3. ~~Add HUD~~ **done in v0.5.0**
 4. ~~Implement Dash state~~ **done in v0.2.0**
 5. Add audio (SFX for jump, land, attack, hit, death)
 6. Fix `test_room_2` camera bounds Y value
@@ -337,3 +339,16 @@ All tuning values are `@export` on `player.gd`. Change them in the Inspector on 
 - `GameManager.transition_to_room()` expects the target room to have a Door node whose `door_id` matches `target_door_id` — always set both ends of a door pair
 - `BaseRoom._setup_room()` finds the player by group `"player"` — always add the Player node to that group
 - The fade overlay in `GameManager` is added to a `CanvasLayer` at runtime — don't add another CanvasLayer-based overlay at z_layer=100 or transitions will break
+
+---
+
+## Working With Claude Code
+
+- **Open this folder in Claude Code** (`cd` here, then `claude`). `.mcp.json` registers the Godot MCP server (`@coding-solo/godot-mcp`) with `GODOT_PATH` pointing at the local console build; approve it the first time Claude Code asks.
+- **Godot binary:** `C:\Users\Ido124\Godot\Godot_v4.6.2-stable_win64_console.exe` (the `_console` build, so output reaches the terminal).
+- **After every script change, check it loads.** Run the game headless for a few seconds and read the errors:
+  `"C:/Users/Ido124/Godot/Godot_v4.6.2-stable_win64_console.exe" --headless --path . --quit-after 300`
+  Any `SCRIPT ERROR` / `Parse Error` line means the change is broken. Exit code 0 with no such lines = it loads and runs.
+- **To see it actually play,** use the MCP `run_project` then `get_debug_output`, `stop_project`. Ido checks feel and visuals in the real window; headless only proves nothing crashes.
+- **Edit `.tscn` files by hand only for small, clear changes** (a property, a node path). For new nodes/scenes prefer the MCP `add_node` / `create_scene` / `save_scene`, or ask Ido to do it in the editor, since a broken scene file won't open.
+- Don't commit or push unless Ido asks. The repo is `github.com/ido1224/2d-metroidvania`.
