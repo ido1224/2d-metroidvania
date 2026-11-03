@@ -1,11 +1,33 @@
 # Dev Log — 2D Metroidvania
 
-## Current Version: 0.10.1
+## Current Version: 0.11.0
 ## Last Updated: 2026-11-03
 
 ---
 
 ## Patch Notes
+
+### [0.11.0] — 2026-11-03 — Shooter enemy + reusable Projectile
+
+Third enemy type: a ground enemy that fights at range. Green placeholder square, 2 HP, placed in `test_room` at (920, 240).
+
+- **Files** — `scenes/enemies/shooter/shooter.gd` + `shooter.tscn`, states in `scenes/enemies/states/shooter/` (`idle`, `alert`, `reposition`, `shoot`, `hurt`). Death reuses `ground_walker/death.gd`.
+- **Keeps its distance** — Reposition holds 90–170 px horizontally from the player, always facing them: backs away (1.2× speed) if closer, walks in if further or if it has no line of sight. `Shooter.can_move(dir)` casts its own wall and floor rays in the direction of travel (it walks backwards, so the facing-based WallCheck/FloorCheck pattern doesn't fit) — it never steps off a ledge or into a wall; cornered, it stands and keeps shooting.
+- **Shoot** — needs a clear ray from its muzzle to the player. Windup 0.45 s (orange glow + swell; aim taken at the end), one orb, 0.35 s recoil/recovery. 1.3 s between shots. Holds fire (cooldown not spent) if line of sight is lost mid-windup.
+- **Projectile** (`scenes/enemies/projectile/`, reusable by any enemy: instance, add to the room, set position, `launch(dir, speed)`) — slow orb (130 px/s), drawn with `_draw()`. Pops on World geometry, on hitting the player, or after 4 s. A pierce dash passes through it (the player's hurtbox is off).
+  - **Hit it back:** its Hurtbox is on EnemyHurtbox (64), so the player's attack hits it. It reverses in the swing direction at 1.6× speed, turns white, and its Hitbox switches to the player's side (layer 8 → mask 64), damaging enemies, including the shooter.
+  - Knockback from the orb is flat sideways, like the walker and flyer.
+- **Tested headless** (throwaway script, not in the repo): player standing at 110 px → 3 shots / 3 hits in 6 s; player walking at a shooter standing on the block → it backed to the block's edge (x 139) and did not fall; real attack input swatted an orb back → shooter 2 → 1 HP; wall between them → 0 shots.
+
+#### Values that may need playtesting
+| Value | File | Now |
+|---|---|---|
+| Preferred distance | `states/shooter/reposition.gd` | 90–170 px |
+| Windup | `states/shooter/shoot.gd` | 0.45 s |
+| Shot cooldown | `shooter.tscn` / `shooter.gd` `shot_cooldown` | 1.3 s |
+| Orb speed | `shooter.gd` `projectile_speed` | 130 px/s |
+| Reflected speed | `projectile.gd` `reflect_speed_mult` | 1.6× |
+| Detection radius | `shooter.tscn` DetectionZone | 200 px |
 
 ### [0.10.1] — 2026-11-03 — Player knockback actually carries
 
@@ -543,5 +565,5 @@ The hitbox is no longer active for the full attack duration. It activates at `_H
 - [ ] Implement pause menu (Escape is already mapped)
 - [ ] Implement map screen (M key is already mapped)
 - [ ] Add more attack types / combos
-- [ ] Add enemy variety (ranged, flying, etc.) — Flyer done in v0.10.0; next: ranged shooter, leaper, shield bearer
+- [ ] Add enemy variety (ranged, flying, etc.) — Flyer done in v0.10.0, Shooter in v0.11.0; next: leaper, shield bearer
 - [ ] Add collectibles / power-ups (use Interactable layer 8)

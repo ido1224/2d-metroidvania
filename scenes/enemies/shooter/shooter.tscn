@@ -1,0 +1,98 @@
+[gd_scene load_steps=16 format=3]
+
+[ext_resource type="Script" path="res://scenes/enemies/shooter/shooter.gd" id="1_shoot"]
+[ext_resource type="Script" path="res://scenes/enemies/states/enemy_state_machine.gd" id="2_sm"]
+[ext_resource type="Script" path="res://scenes/enemies/states/shooter/idle.gd" id="3_idle"]
+[ext_resource type="Script" path="res://scenes/enemies/states/shooter/alert.gd" id="4_alert"]
+[ext_resource type="Script" path="res://scenes/enemies/states/shooter/reposition.gd" id="5_repo"]
+[ext_resource type="Script" path="res://scenes/enemies/states/shooter/shoot.gd" id="6_shoot"]
+[ext_resource type="Script" path="res://scenes/enemies/states/shooter/hurt.gd" id="7_hurt"]
+[ext_resource type="Script" path="res://scenes/enemies/states/ground_walker/death.gd" id="8_death"]
+[ext_resource type="PackedScene" path="res://scenes/components/hurtbox.tscn" id="9_hurtbox"]
+[ext_resource type="PackedScene" path="res://scenes/components/hitbox.tscn" id="10_hitbox"]
+[ext_resource type="PackedScene" path="res://scenes/components/health_component.tscn" id="11_health"]
+[ext_resource type="Texture2D" path="res://assets/sprites/tilesets/placeholder_tile.png" id="12_sprite"]
+
+[sub_resource type="RectangleShape2D" id="body_shape"]
+size = Vector2(16, 16)
+
+[sub_resource type="CircleShape2D" id="detection_shape"]
+radius = 200.0
+
+; ---------------------------------------------------------------
+; Physics layer reference:
+;   World=1  Player=2  Enemy=4  PlayerHitbox=8
+;   EnemyHitbox=16  PlayerHurtbox=32  EnemyHurtbox=64
+;
+; Same node layout BaseEnemy requires. No WallCheck/FloorCheck:
+; it walks backwards while facing the player, so shooter.gd's
+; can_move() casts its own rays in the direction of travel.
+; The Hitbox is never activated (it fights with projectiles); it
+; is here because the shared Death state deactivates it.
+; Death is the Ground Walker's (nothing walker-specific in it).
+; ---------------------------------------------------------------
+
+[node name="Shooter" type="CharacterBody2D"]
+collision_layer = 4
+collision_mask = 1
+script = ExtResource("1_shoot")
+run_speed = 45.0
+
+; Bright green tint to tell it apart (walker = grey, flyer = purple).
+; self_modulate, so hit flash / windup glow (modulate) still show.
+[node name="Sprite2D" type="Sprite2D" parent="."]
+self_modulate = Color(1.2, 2.4, 1.1, 1)
+texture = ExtResource("12_sprite")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("body_shape")
+
+[node name="StateMachine" type="Node" parent="."]
+script = ExtResource("2_sm")
+initial_state_name = "Idle"
+
+[node name="Idle" type="Node" parent="StateMachine"]
+script = ExtResource("3_idle")
+
+[node name="Alert" type="Node" parent="StateMachine"]
+script = ExtResource("4_alert")
+
+[node name="Reposition" type="Node" parent="StateMachine"]
+script = ExtResource("5_repo")
+
+[node name="Shoot" type="Node" parent="StateMachine"]
+script = ExtResource("6_shoot")
+
+[node name="Hurt" type="Node" parent="StateMachine"]
+script = ExtResource("7_hurt")
+
+[node name="Death" type="Node" parent="StateMachine"]
+script = ExtResource("8_death")
+
+[node name="Hurtbox" parent="." instance=ExtResource("9_hurtbox")]
+collision_layer = 64
+collision_mask = 0
+
+[node name="Hitbox" parent="." instance=ExtResource("10_hitbox")]
+collision_layer = 16
+collision_mask = 32
+monitoring = false
+
+; 2 HP — dangerous at range, fragile up close
+[node name="HealthComponent" parent="." instance=ExtResource("11_health")]
+max_health = 2
+
+[node name="DetectionZone" type="Area2D" parent="."]
+collision_layer = 0
+collision_mask = 2
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="DetectionZone"]
+shape = SubResource("detection_shape")
+
+[node name="BodyArea" type="Area2D" parent="."]
+collision_layer = 16
+collision_mask = 32
+monitorable = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="BodyArea"]
+shape = SubResource("body_shape")
